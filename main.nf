@@ -1,23 +1,20 @@
 #!/usr/bin/env nextflow
 
 params.file_int = 5
-params.algorithm = 'invalid'
 
 file_int = params.file_int
-algorithm = params.algorithm
 
 def helpMessage(message) {
     log.info"""
     ${message}
 
-    Run selected hashing algorithm on one of multiple files
+    Run multiple hashing algorithms on one of multiple files
 
     Usage:
 
-    nextflow run jb-adams/md5-nf --algorithm \${ALGORITHM} --file_int \${FILE_INT}
+    nextflow run jb-adams/md5-nf --file_int \${FILE_INT}
 
     Mandatory arguments:
-      --algorithm   [string] hashing algorithm to run. accepted values: [md5, sha1, sha256]
       --file_int    [int] file to run. accepted values: [0, 1, 2, 3, 4]
     
     Optional arguments:
@@ -28,38 +25,54 @@ def helpMessage(message) {
 
 if (params.help) exit 0, helpMessage("")
 
-
-
 if (file_int != 0 && file_int != 1 && file_int != 2 && file_int != 3 && file_int != 4 ) {
     exit 1, helpMessage("ERROR: missing or invalid value for --file_int")
 }
 
-if (algorithm != 'md5' && algorithm != 'sha1' && algorithm != 'sha256') {
-    exit 1, helpMessage("ERROR: missing or invalid value for --algorithm")
-}
-
 file_path = "/data/${file_int}.json"
 
-process checksum {
+process md5 {
 
     output:
-    stdout result
+    stdout md5
 
     script:
-    if (algorithm == 'md5') {
-        """
-        md5sum ${file_path} | cut -f 1 -d ' '
-        """
-    }
-    else if (algorithm == 'sha1') {
-        """
-        sha1sum ${file_path} | cut -f 1 -d ' '
-        """
-    } else if (algorithm == 'sha256') {
-        """
-        sha256sum ${file_path} | cut -f 1 -d ' '
-        """
-    }
+    """
+    echo "Running md5 on ${file_path}" >&2
+    md5sum ${file_path} | cut -f 1 -d ' '
+    """
 }
 
-result.view {it.trim()}
+process sha1 {
+
+    input:
+    stdin md5
+
+    output:
+    stdout sha1
+
+    script:
+    """
+    echo "Running sha1 on ${file_path}" >&2
+    sha1sum ${file_path} | cut -f 1 -d ' '
+    """
+}
+
+process sha256 {
+
+    input:
+    stdin sha1
+
+    output:
+    stdout sha256
+
+    script:
+    """
+    echo "Running sha256 on ${file_path}" >&2
+    sha256sum ${file_path} | cut -f 1 -d ' '
+    """
+}
+
+md5.view {it.trim()}
+sha1.view {it.trim()}
+sha256.view {it.trim()}
