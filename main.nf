@@ -39,7 +39,7 @@ process md5 {
     script:
     """
     echo "Running md5 on ${file_path}" >&2
-    cat ${file_path}
+    cat ${file_path} | cut -f 1 -d ' '
     """
 }
 
