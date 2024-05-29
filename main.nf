@@ -44,5 +44,3 @@ process md5 {
 }
 
 md5.view {it.trim()}
-sha1.view {it.trim()}
-sha256.view {it.trim()}
