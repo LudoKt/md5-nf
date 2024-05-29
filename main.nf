@@ -43,36 +43,6 @@ process md5 {
     """
 }
 
-process sha1 {
-
-    input:
-    stdin md5
-
-    output:
-    stdout sha1
-
-    script:
-    """
-    echo "Running sha1 on ${file_path}" >&2
-    sha1sum ${file_path} | cut -f 1 -d ' '
-    """
-}
-
-process sha256 {
-
-    input:
-    stdin sha1
-
-    output:
-    stdout sha256
-
-    script:
-    """
-    echo "Running sha256 on ${file_path}" >&2
-    sha256sum ${file_path} | cut -f 1 -d ' '
-    """
-}
-
 md5.view {it.trim()}
 sha1.view {it.trim()}
 sha256.view {it.trim()}
